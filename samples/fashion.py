@@ -1,7 +1,11 @@
 import os
 import json
+import random
+
 import pandas as pd
 import imgaug.augmenters as iaa
+import matplotlib.pyplot as plt
+import numpy as np
 
 import sys
 
@@ -31,6 +35,7 @@ class FashionDataset(Dataset):
     """
     config:
     """
+
     def __init__(self, config, image_dir, image_ids, class_names,
                  data_frame, x_column, y_column, aug_class=[]):
         super(FashionDataset, self).__init__(config)
@@ -113,3 +118,24 @@ def get_data(image_dir, base_dir, train_data_filename):
     return FashionDataset(config, image_dir, train_data['val_ids'], train_data['class_names'], image_data,
                           x_column,
                           y_column)
+
+
+def display_random_data(data: FashionDataset):
+    augmentation = iaa.SomeOf(1, [
+        iaa.AdditiveGaussianNoise(scale=0.15 * 255),
+        iaa.Identity(),
+        iaa.MotionBlur(k=18),
+        iaa.Fliplr(),
+        iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),
+        iaa.CropToFixedSize(width=data.image_shape[0], height=data.image_shape[1])
+    ], random_order=True)
+
+    selected_image_ids = random.sample(list(data.image_ids), 4)
+    selected_image_ids = [data.get_image(im_id) for im_id in selected_image_ids]
+
+    plt.figure(figsize=(20, 10))
+    plt.imshow(np.hstack(selected_image_ids))
+    plt.figtext(.5, .75, 'Orginal picture', fontsize=30, ha='center')
+    plt.figure(figsize=(20, 10))
+    plt.figtext(.5, .75, 'augmented picture', fontsize=30, ha='center')
+    plt.imshow(np.hstack(augmentation(images=selected_image_ids)))
