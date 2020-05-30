@@ -38,6 +38,8 @@ class Config(object):
     MODEL_CHECKPOINT_SAVE_WEIGHTS_ONLY = True
 
     # EarlyStopping
+    EARLY_STOPPING_ENABLE = True
+
     EARLY_STOPPING_VERBOSE = 1
 
     EARLY_STOPPING_MONITOR = 'val_loss'

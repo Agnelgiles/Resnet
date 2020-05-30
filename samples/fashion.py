@@ -30,6 +30,8 @@ class FashionConfig(Config):
 
     LEARNING_RATE = 0.0001
 
+    EARLY_STOPPING_PATIENCE = 6
+
 
 class FashionDataset(Dataset):
     """
@@ -72,16 +74,16 @@ def train_phase1(image_dir, base_dir, train_data_filename):
 
     resnet = Resnet('training', config, base_dir, arch='resnet50')
 
-    argumentation = iaa.SomeOf(1, [
+    augmentation = iaa.SomeOf(1, [
         iaa.AdditiveGaussianNoise(scale=0.15 * 255),
         iaa.Identity(),
         iaa.MotionBlur(k=18),
         iaa.Fliplr(),
         iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),
-        iaa.CropToFixedSize(width=config.IMAGE_INPUT_SHAPE[0], height=config.IMAGE_INPUT_SHAPE[0])
+        iaa.CropToFixedSize(width=train_data.image_shape[0], height=train_data.image_shape[1])
     ], random_order=True)
 
-    result = resnet.train(trainDataset, valDataset, layer='all', augumentation=argumentation)
+    result = resnet.train(trainDataset, valDataset, layer='all', augumentation=augmentation)
     return result
 
 

@@ -285,13 +285,14 @@ class Resnet:
 
             ModelCheckpoint(ckpt_file_path,
                             verbose=self.config.MODEL_CHECKPOINT_VERBOSE,
-                            save_weights_only=self.config.MODEL_CHECKPOINT_SAVE_WEIGHTS_ONLY),
-
-            EarlyStopping(verbose=self.config.EARLY_STOPPING_VERBOSE,
-                          monitor=self.config.EARLY_STOPPING_MONITOR,
-                          patience=self.config.EARLY_STOPPING_PATIENCE,
-                          restore_best_weights=self.config.EARLY_STOPPING_RESTORE_BEST_WEIGHTS)
+                            save_weights_only=self.config.MODEL_CHECKPOINT_SAVE_WEIGHTS_ONLY)
         ]
+        if self.config.EARLY_STOPPING_ENABLE:
+            callbacks.append(EarlyStopping(verbose=self.config.EARLY_STOPPING_VERBOSE,
+                                           monitor=self.config.EARLY_STOPPING_MONITOR,
+                                           patience=self.config.EARLY_STOPPING_PATIENCE,
+                                           restore_best_weights=self.config.EARLY_STOPPING_RESTORE_BEST_WEIGHTS))
+
         n_workers = multiprocessing.cpu_count()
         result = self.model.fit_generator(
             train_data_gen,
