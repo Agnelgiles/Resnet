@@ -3,9 +3,18 @@ import json
 import pandas as pd
 import imgaug.augmenters as iaa
 
+import sys
+
+ROOT_DIR = os.path.abspath("Resnet/")
+
+sys.path.append(ROOT_DIR)
+
 from resnet.config import Config
 from resnet.model import Dataset
 from resnet.model import Resnet
+
+"""create Config file with your specific configuration by
+ by override Config class"""
 
 
 class FashionConfig(Config):
@@ -19,6 +28,9 @@ class FashionConfig(Config):
 
 
 class FashionDataset(Dataset):
+    """
+    config:
+    """
     def __init__(self, config, image_dir, image_ids, class_names,
                  data_frame, x_column, y_column, aug_class=[]):
         super(FashionDataset, self).__init__(config)
