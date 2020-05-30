@@ -17,9 +17,13 @@ from keras import Model
 from keras.optimizers import SGD
 import sys
 
+# plot packages
 from matplotlib import pyplot as plt
-from sklearn.metrics import classification_report, roc_curve, roc_auc_score
+import seaborn
+
+from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
 
 import os
 
@@ -147,32 +151,32 @@ class Resnet:
 
         # Stage1
         x = ZeroPadding2D((3, 3))(imageInput)
-        x = Conv2D(64, (7, 7), strides=(2, 2), use_bias=True, name='conv1_conv')(x)
-        x = BatchNorm(name='conv1_bn')(x, training=self.config.TRAIN_BN)
+        x = Conv2D(64, (7, 7), strides=(2, 2), use_bias=True, name='conv1')(x)
+        x = BatchNorm(name='bn_conv1')(x, training=self.config.TRAIN_BN)
         x = Activation(activation='relu')(x)
         x = MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
 
         # stage 2
-        x = self.conv_block(x, [64, 64, 256], 2, 1, strides=(1, 1), kernal_size=(3, 3))
-        x = self.identity_block(x, [64, 64, 256], 2, 2, kernal_size=(3, 3))
-        x = self.identity_block(x, [64, 64, 256], 2, 3, kernal_size=(3, 3))
+        x = self.conv_block(x, [64, 64, 256], 2, 'a', strides=(1, 1), kernal_size=(3, 3))
+        x = self.identity_block(x, [64, 64, 256], 2, 'b', kernal_size=(3, 3))
+        x = self.identity_block(x, [64, 64, 256], 2, 'c', kernal_size=(3, 3))
 
         # stage 3
-        x = self.conv_block(x, [128, 128, 512], 3, 1, kernal_size=(3, 3))
-        x = self.identity_block(x, [128, 128, 512], 3, 2, kernal_size=(3, 3))
-        x = self.identity_block(x, [128, 128, 512], 3, 3, kernal_size=(3, 3))
-        x = self.identity_block(x, [128, 128, 512], 3, 4, kernal_size=(3, 3))
+        x = self.conv_block(x, [128, 128, 512], 3, 'a', kernal_size=(3, 3))
+        x = self.identity_block(x, [128, 128, 512], 3, 'b', kernal_size=(3, 3))
+        x = self.identity_block(x, [128, 128, 512], 3, 'c', kernal_size=(3, 3))
+        x = self.identity_block(x, [128, 128, 512], 3, 'd', kernal_size=(3, 3))
 
         # stage 4
-        x = self.conv_block(x, [256, 256, 1024], 4, 1, kernal_size=(3, 3))
+        x = self.conv_block(x, [256, 256, 1024], 4, block='a', kernal_size=(3, 3))
         block_count = {'resnet50': 5, 'resnet101': 22}[self.arch]
         for i in range(block_count):
-            x = self.identity_block(x, [256, 256, 1024], 4, 2 + i, kernal_size=(3, 3))
+            x = self.identity_block(x, [256, 256, 1024], stage=4, block=chr(98 + i), kernal_size=(3, 3))
 
         # stage 5
-        x = self.conv_block(x, [512, 512, 2048], 5, 1, kernal_size=(3, 3))
-        x = self.identity_block(x, [512, 512, 2048], 5, 2, kernal_size=(3, 3))
-        x = self.identity_block(x, [512, 512, 2048], 5, 3, kernal_size=(3, 3))
+        x = self.conv_block(x, [512, 512, 2048], 5, 'a', kernal_size=(3, 3))
+        x = self.identity_block(x, [512, 512, 2048], 5, 'b', kernal_size=(3, 3))
+        x = self.identity_block(x, [512, 512, 2048], 5, 'c', kernal_size=(3, 3))
 
         # top layer
         x = AveragePooling2D((7, 7), name='avg_pool')(x)
@@ -188,31 +192,34 @@ class Resnet:
 
         if self.mode == 'training':
             if self.ckpt_file is not None:
-                model.load_weights(self.ckpt_file, by_name=True)
+                model.load_weights(self.ckpt_file)
             return model
 
         else:
             if self.ckpt_file is not None:
-                model.load_weights(self.ckpt_file, by_name=True)
+                model.load_weights(self.ckpt_file)
                 print("model load with latest weights {}".format(self.ckpt_file))
             return model
 
     def identity_block(self, input_data, filters, stage, block, use_bais=True, kernal_size=(3, 3),
                        strides=(1, 1)):
         filter1, filter2, filter3 = filters
-        base_name = 'conv' + str(stage) + '_block' + str(block)
+        conv_name_base = 'res' + str(stage) + block + '_branch'
+        bn_name_base = 'bn' + str(stage) + block + '_branch'
 
-        x = Conv2D(filter1, (1, 1), strides=strides, use_bias=use_bais, name=base_name + '_1_conv')(input_data)
-        x = BatchNorm(name=base_name + '_1_bn')(x, training=self.config.TRAIN_BN)
+        x = Conv2D(filter1, (1, 1), strides=strides, use_bias=use_bais,
+                   name=conv_name_base + '2a')(input_data)
+        x = BatchNorm(name=bn_name_base + '2a')(x, training=self.config.TRAIN_BN)
         x = Activation(activation='relu')(x)
 
         x = Conv2D(filter2, kernal_size, use_bias=use_bais,
-                   name=base_name + '_2_conv', padding='same')(x)
-        x = BatchNorm(name=base_name + '_2_bn')(x, training=self.config.TRAIN_BN)
+                   name=conv_name_base + '2b', padding='same')(x)
+        x = BatchNorm(name=bn_name_base + '2b')(x, training=self.config.TRAIN_BN)
         x = Activation(activation='relu')(x)
 
-        x = Conv2D(filter3, (1, 1), strides=strides, use_bias=use_bais, name=base_name + '_3_conv')(x)
-        x = BatchNorm(name=base_name + '_3_bn')(x, training=self.config.TRAIN_BN)
+        x = Conv2D(filter3, (1, 1), strides=strides, use_bias=use_bais,
+                   name=conv_name_base + '2c')(x)
+        x = BatchNorm(name=bn_name_base + '2c')(x, training=self.config.TRAIN_BN)
 
         x = Add()([x, input_data])
         x = Activation(activation='relu', name='res' + str(stage) + str(block) + '_out')(x)
@@ -222,24 +229,27 @@ class Resnet:
     def conv_block(self, input_data, filters, stage, block, use_bais=True, kernal_size=(3, 3),
                    strides=(2, 2)):
         filter1, filter2, filter3 = filters
-        base_name = 'conv' + str(stage) + '_block' + str(block)
+        conv_name_base = 'res' + str(stage) + block + '_branch'
+        bn_name_base = 'bn' + str(stage) + block + '_branch'
 
-        x = Conv2D(filter1, (1, 1), strides=strides, use_bias=use_bais, name=base_name + '_1_conv')(
+        x = Conv2D(filter1, (1, 1), strides=strides, use_bias=use_bais, name=conv_name_base + '2a')(
             input_data)
-        x = BatchNorm(name=base_name + '_1_bn')(x, training=self.config.TRAIN_BN)
+        x = BatchNorm(name=bn_name_base + '2a')(x, training=self.config.TRAIN_BN)
         x = Activation(activation='relu')(x)
 
         x = Conv2D(filter2, kernal_size, use_bias=use_bais,
-                   name=base_name + '_2_conv', padding='same')(x)
-        x = BatchNorm(name=base_name + '_2_bn')(x, training=self.config.TRAIN_BN)
+                   name=conv_name_base + '2b', padding='same')(x)
+        x = BatchNorm(name=bn_name_base + '2b')(x, training=self.config.TRAIN_BN)
         x = Activation(activation='relu')(x)
 
-        x = Conv2D(filter3, (1, 1), use_bias=use_bais, name=base_name + '_3_conv')(x)
-        x = BatchNorm(name=base_name + '_3_bn')(x, training=self.config.TRAIN_BN)
+        x = Conv2D(filter3, (1, 1), use_bias=use_bais, name=conv_name_base + '2c')(x)
+        x = BatchNorm(name=bn_name_base + '2c')(x, training=self.config.TRAIN_BN)
 
-        shortcut = Conv2D(filter3, (1, 1), strides=strides, use_bias=use_bais, name=base_name + '_0_conv')(
+        shortcut = Conv2D(filter3, (1, 1), strides=strides, use_bias=use_bais,
+                          name=conv_name_base + '1')(
             input_data)
-        shortcut = BatchNorm(name=base_name + '_0_bn')(shortcut, training=self.config.TRAIN_BN)
+        shortcut = BatchNorm(name=bn_name_base + '1')(shortcut,
+                                                      training=self.config.TRAIN_BN)
 
         x = Add()([x, shortcut])
         x = Activation(activation='relu', name='res' + str(stage) + str(block) + '_out')(x)
@@ -258,7 +268,7 @@ class Resnet:
                     self.start_epoch = epoch_num
                     self.ckpt_file = os.path.join(self.log_dir, file)
 
-    def train(self, trainDataset, valDataset, layer='all',augumentation=None):
+    def train(self, trainDataset, valDataset, layer='all', augumentation=None):
         assert layer in ['all', 'last']
         self.set_trainable(layer)
 
@@ -315,7 +325,7 @@ class Resnet:
 
     def evaluate(self, data: Dataset, ckpt_file=None):
         if ckpt_file is not None:
-            self.model.load_weights(ckpt_file, by_name=True)
+            self.model.load_weights(ckpt_file)
             print('model load with weight {}'.format(ckpt_file))
         y_true = [data.get_class_for_image(img_id) for img_id in data.image_ids]
         probs = np.zeros((data.num_images, data.num_classes))
@@ -324,9 +334,11 @@ class Resnet:
         y_pred = [p.argmax() for p in probs]
         print('Accuracy: %.3f' % accuracy_score(y_true, y_pred))
         print(classification_report(y_true, y_pred, target_names=data.class_names))
-        y_true = pd.Series(y_true, name='Actual')
-        y_pred = pd.Series(y_pred, name='Predicted')
-        return pd.crosstab(y_true, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True)
+        conf_matx = confusion_matrix(y_true, y_pred)
+        df_cm = pd.DataFrame(conf_matx, index=data.class_names,
+                             columns=data.class_names)
+        plt.figure(figsize=(20, 20))
+        seaborn.heatmap(df_cm, annot=True)
 
 
 class DataGenerator(keras.utils.Sequence):

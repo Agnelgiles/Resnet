@@ -95,8 +95,8 @@ def evaluate(image_dir, base_dir, train_data_filename, ckpt_file=None):
 
     resnet = Resnet('inference', config, base_dir, arch='resnet50')
     if ckpt_file is not None:
-        ckpt_file = os.path.join(base_dir, config.LOG_DIR_NAME, ckpt_file)
-    return resnet.evaluate(testDataset, ckpt_file)
+        ckpt_file = os.path.join(base_dir, ckpt_file)
+    resnet.evaluate(testDataset, ckpt_file)
 
 
 def get_data(image_dir, base_dir, train_data_filename):
