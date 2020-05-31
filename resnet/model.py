@@ -191,13 +191,15 @@ class Resnet:
         model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 
         if self.mode == 'training':
-            if self.ckpt_file is not None:
-                model.load_weights(self.ckpt_file)
+            if self.ckpt_file is not None and os.path.isfile(self.ckpt_file):
+                load_status = model.load_weights(self.ckpt_file)
+                load_status.assert_consumed()
             return model
 
         else:
             if self.ckpt_file is not None:
-                model.load_weights(self.ckpt_file)
+                load_status =model.load_weights(self.ckpt_file)
+                load_status.assert_consumed()
                 print("model load with latest weights {}".format(self.ckpt_file))
             return model
 

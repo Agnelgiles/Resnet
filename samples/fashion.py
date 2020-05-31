@@ -145,3 +145,8 @@ def display_random_data(data: FashionDataset):
     plt.figure(figsize=(20, 10))
     plt.figtext(.5, .75, 'augmented picture', fontsize=30, ha='center')
     plt.imshow(np.hstack(augmentation(images=selected_image_ids)))
+
+
+def get_model(base_dir):
+    config = FashionConfig()
+    return Resnet('training', config, base_dir, arch='resnet50')
