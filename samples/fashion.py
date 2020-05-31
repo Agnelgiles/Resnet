@@ -17,11 +17,11 @@ from resnet.config import Config
 from resnet.model import Dataset
 from resnet.model import Resnet
 
-"""create Config file with your specific configuration by
- by override Config class"""
-
 
 class FashionConfig(Config):
+    """create Config file with your specific configuration by
+     by override Config class"""
+
     NUMBER_OF_CLASSES = 20
 
     BATCH_SIZE = 30
@@ -30,7 +30,9 @@ class FashionConfig(Config):
 
     LEARNING_RATE = 0.0001
 
-    EARLY_STOPPING_PATIENCE = 6
+    IMAGE_MIN_DIM = 448
+
+    IMAGE_MAX_DIM = 448
 
 
 class FashionDataset(Dataset):
@@ -50,14 +52,16 @@ class FashionDataset(Dataset):
             img_path = os.path.join(image_dir, str(img_id) + '.jpg')
             class_name = data_frame[data_frame[x_column] == img_id][y_column].iloc[0]
             self.add_image('fashion', img_id, class_name, img_path)
+
         self.prepare()
 
 
-def train_phase1(image_dir, base_dir, train_data_filename):
+def train(image_dir, base_dir, train_data_filename):
     config = FashionConfig()
     train_data_filename = os.path.join(base_dir, train_data_filename)
     with open(train_data_filename) as f:
         train_data = json.load(f)
+    config.NUMBER_OF_CLASSES = len(train_data['class_names'])
     dataframe_path = os.path.join(base_dir, config.DATA_FRAME_FILE_NAME)
     image_data = pd.read_csv(dataframe_path)
 
@@ -66,7 +70,7 @@ def train_phase1(image_dir, base_dir, train_data_filename):
 
     trainDataset = FashionDataset(config, image_dir, train_data['train_ids'], train_data['class_names'], image_data,
                                   x_column,
-                                  y_column, aug_class=['Bags', 'Innerwear', 'Lips', 'Loungewear and Nightwear', 'Ties'])
+                                  y_column)
 
     valDataset = FashionDataset(config, image_dir, train_data['val_ids'], train_data['class_names'], image_data,
                                 x_column,
@@ -74,16 +78,16 @@ def train_phase1(image_dir, base_dir, train_data_filename):
 
     resnet = Resnet('training', config, base_dir, arch='resnet50')
 
-    augmentation = iaa.SomeOf(1, [
-        iaa.AdditiveGaussianNoise(scale=0.15 * 255),
-        iaa.Identity(),
-        iaa.MotionBlur(k=18),
-        iaa.Fliplr(),
-        iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),
-        iaa.CropToFixedSize(width=train_data.image_shape[0], height=train_data.image_shape[1])
-    ], random_order=True)
+    # augmentation = iaa.SomeOf(1, [
+    #     iaa.AdditiveGaussianNoise(scale=0.15 * 255),
+    #     iaa.Identity(),
+    #     iaa.MotionBlur(k=18),
+    #     iaa.Fliplr(),
+    #     iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),
+    #     iaa.CropToFixedSize(width=train_data.image_shape[0], height=train_data.image_shape[1])
+    # ], random_order=True)
 
-    result = resnet.train(trainDataset, valDataset, layer='all', augumentation=augmentation)
+    result = resnet.train(trainDataset, valDataset, layer='all')
     return result
 
 
