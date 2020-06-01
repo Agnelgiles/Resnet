@@ -270,7 +270,9 @@ class Resnet:
                     self.start_epoch = epoch_num
                     self.ckpt_file = os.path.join(self.log_dir, file)
 
-    def train(self, trainDataset, valDataset, layer='all', augumentation=None):
+    def train(self, trainDataset, valDataset, layer='all', augumentation=None, epoch=None):
+        if epoch is None:
+            epoch = self.config.NUMBER_OF_EPOCH
         assert layer in ['all', 'last']
         self.set_trainable(layer)
 
@@ -299,7 +301,7 @@ class Resnet:
         result = self.model.fit_generator(
             train_data_gen,
             validation_data=val_data_gen,
-            epochs=self.config.NUMBER_OF_EPOCH,
+            epochs=epoch,
             initial_epoch=self.start_epoch,
             callbacks=callbacks,
             use_multiprocessing=True,
