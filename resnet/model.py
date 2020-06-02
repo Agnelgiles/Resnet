@@ -192,14 +192,12 @@ class Resnet:
 
         if self.mode == 'training':
             if self.ckpt_file is not None and os.path.isfile(self.ckpt_file):
-                load_status = model.load_weights(self.ckpt_file)
-                load_status.assert_consumed()
+                model.load_weights(self.ckpt_file)
             return model
 
         else:
             if self.ckpt_file is not None:
-                load_status =model.load_weights(self.ckpt_file)
-                load_status.assert_consumed()
+                model.load_weights(self.ckpt_file)
                 print("model load with latest weights {}".format(self.ckpt_file))
             return model
 
