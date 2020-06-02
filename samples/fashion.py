@@ -34,7 +34,7 @@ class FashionConfig(Config):
 
     IMAGE_MAX_DIM = 448
 
-    MEAN_PIXEL = np.array([215.16, 210.46, 208.79])
+    # MEAN_PIXEL = np.array([215.16, 210.46, 208.79])
 
 
 class FashionDataset(Dataset):
@@ -89,7 +89,7 @@ def train(image_dir, base_dir, train_data_filename):
     #     iaa.CropToFixedSize(width=train_data.image_shape[0], height=train_data.image_shape[1])
     # ], random_order=True)
 
-    result = resnet.train(trainDataset, valDataset, layer='all',epoch=20)
+    result = resnet.train(trainDataset, valDataset, layer='all', epoch=20)
     return result
 
 
