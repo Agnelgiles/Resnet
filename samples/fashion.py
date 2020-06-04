@@ -28,13 +28,11 @@ class FashionConfig(Config):
 
     DATA_FRAME_FILE_NAME = 'images.csv'
 
-    LEARNING_RATE = 0.0001
+    LEARNING_RATE = 0.001
 
     IMAGE_MIN_DIM = 448
 
     IMAGE_MAX_DIM = 448
-
-    EARLY_STOPPING_ENABLE = False
 
     # MEAN_PIXEL = np.array([215.16, 210.46, 208.79])
 
@@ -74,7 +72,7 @@ def train(image_dir, base_dir, train_data_filename):
 
     trainDataset = FashionDataset(config, image_dir, train_data['train_ids'], train_data['class_names'], image_data,
                                   x_column,
-                                  y_column)
+                                  y_column, aug_class=['Bags', 'Innerwear', 'Lips', 'Loungewear and Nightwear', 'Ties'])
 
     valDataset = FashionDataset(config, image_dir, train_data['val_ids'], train_data['class_names'], image_data,
                                 x_column,
@@ -82,16 +80,16 @@ def train(image_dir, base_dir, train_data_filename):
 
     resnet = Resnet('training', config, base_dir, arch='resnet50')
 
-    # augmentation = iaa.SomeOf(1, [
-    #     iaa.AdditiveGaussianNoise(scale=0.15 * 255),
-    #     iaa.Identity(),
-    #     iaa.MotionBlur(k=18),
-    #     iaa.Fliplr(),
-    #     iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),
-    #     iaa.CropToFixedSize(width=train_data.image_shape[0], height=train_data.image_shape[1])
-    # ], random_order=True)
+    augmentation = iaa.SomeOf(1, [
+        iaa.AdditiveGaussianNoise(scale=0.15 * 255),
+        iaa.Identity(),
+        iaa.MotionBlur(k=18),
+        iaa.Fliplr(),
+        iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),
+        iaa.CropToFixedSize(width=trainDataset.image_shape[0], height=trainDataset.image_shape[1])
+    ], random_order=True)
 
-    result = resnet.train(trainDataset, valDataset, layer='all', epoch=40)
+    result = resnet.train(trainDataset, valDataset, layer='all', epoch=20, augmentation=augmentation)
     return result
 
 
