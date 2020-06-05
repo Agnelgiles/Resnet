@@ -333,7 +333,7 @@ class Resnet:
         y_true = [data.get_class_for_image(img_id) for img_id in data.image_ids]
         data_gen = DataGenerator(data, data.config)
         probs = self.model.predict_generator(data_gen)
-        probs = probs[:data.num_images - 1, :]
+        probs = probs[:data.num_images, :]
         # for img_id in data.image_ids:
         #     probs[img_id] = self.model.predict(np.expand_dims(data.get_image(img_id), axis=0))[0]
         y_pred = [p.argmax() for p in probs]
