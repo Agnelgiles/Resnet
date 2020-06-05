@@ -332,8 +332,11 @@ class Resnet:
             print('model load with weight {}'.format(ckpt_file))
         y_true = [data.get_class_for_image(img_id) for img_id in data.image_ids]
         probs = np.zeros((data.num_images, data.num_classes))
-        for img_id in data.image_ids:
-            probs[img_id] = self.model.predict(np.expand_dims(data.get_image(img_id), axis=0))[0]
+        data_gen = DataGenerator(data, data.config)
+        probs = self.model.predict_generator(data_gen)
+        probs = probs[:data.num_images - 1, :]
+        # for img_id in data.image_ids:
+        #     probs[img_id] = self.model.predict(np.expand_dims(data.get_image(img_id), axis=0))[0]
         y_pred = [p.argmax() for p in probs]
         print('Accuracy: %.3f' % accuracy_score(y_true, y_pred))
         print(classification_report(y_true, y_pred, target_names=data.class_names))
@@ -378,8 +381,6 @@ class DataGenerator(keras.utils.Sequence):
         # Initialization
         X = np.zeros((self.batch_size, *self.dataset.image_shape))
         Y = np.zeros((self.batch_size, self.dataset.num_classes), dtype=int)
-
-        aug_cat = ['Bags', 'Innerwear', 'Lips', 'Loungewear and Nightwear', 'Ties']
 
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
