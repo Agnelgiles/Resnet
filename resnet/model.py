@@ -331,7 +331,6 @@ class Resnet:
             self.model.load_weights(ckpt_file)
             print('model load with weight {}'.format(ckpt_file))
         y_true = [data.get_class_for_image(img_id) for img_id in data.image_ids]
-        probs = np.zeros((data.num_images, data.num_classes))
         data_gen = DataGenerator(data, data.config)
         probs = self.model.predict_generator(data_gen)
         probs = probs[:data.num_images - 1, :]
