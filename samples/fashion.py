@@ -82,7 +82,7 @@ def train(image_dir, base_dir, train_data_filename):
 
     augmentation = iaa.SomeOf(1, [
         iaa.AdditiveGaussianNoise(scale=0.15 * 255),
-        iaa.Identity(),
+        iaa.Noop(),
         iaa.MotionBlur(k=18),
         iaa.Fliplr(),
         iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),
