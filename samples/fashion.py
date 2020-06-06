@@ -34,6 +34,10 @@ class FashionConfig(Config):
 
     IMAGE_MAX_DIM = 448
 
+    EARLY_STOPPING_ENABLE = False
+
+    WEIGHT_DECAY = 0.00005
+
     # MEAN_PIXEL = np.array([215.16, 210.46, 208.79])
 
 
