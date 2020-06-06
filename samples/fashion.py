@@ -149,7 +149,7 @@ def display_random_data(data: FashionDataset):
     plt.figure(figsize=(20, 10))
     plt.imshow(np.hstack(selected_images))
     plt.figtext(.5, .75, 'Orginal picture', fontsize=30, ha='center')
-    plt.figtext(.5, .50, selected_images_class, fontsize=20, ha='center')
+    plt.figtext(.5, .60, selected_images_class, fontsize=20, ha='center')
     plt.figure(figsize=(20, 10))
     plt.figtext(.5, .75, 'augmented picture', fontsize=30, ha='center')
     plt.imshow(np.hstack(augmentation(images=selected_images)))
