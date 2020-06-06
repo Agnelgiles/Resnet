@@ -135,7 +135,7 @@ def get_data(image_dir, base_dir, train_data_filename):
 def display_random_data(data: FashionDataset):
     augmentation = iaa.SomeOf(1, [
         iaa.AdditiveGaussianNoise(scale=0.15 * 255),
-        iaa.Identity(),
+        iaa.Noop(),
         iaa.MotionBlur(k=18),
         iaa.Fliplr(),
         iaa.Affine(translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}),
@@ -143,14 +143,16 @@ def display_random_data(data: FashionDataset):
     ], random_order=True)
 
     selected_image_ids = random.sample(list(data.image_ids), 4)
-    selected_image_ids = [data.get_image(im_id) for im_id in selected_image_ids]
+    selected_images = [data.get_image(im_id) for im_id in selected_image_ids]
+    selected_images_class = [data.class_names[data.get_class_for_image(im_id)] for im_id in selected_image_ids]
 
     plt.figure(figsize=(20, 10))
-    plt.imshow(np.hstack(selected_image_ids))
+    plt.imshow(np.hstack(selected_images))
     plt.figtext(.5, .75, 'Orginal picture', fontsize=30, ha='center')
+    plt.figtext(.5, .50, selected_images_class, fontsize=20, ha='center')
     plt.figure(figsize=(20, 10))
     plt.figtext(.5, .75, 'augmented picture', fontsize=30, ha='center')
-    plt.imshow(np.hstack(augmentation(images=selected_image_ids)))
+    plt.imshow(np.hstack(augmentation(images=selected_images)))
 
 
 def get_model(base_dir):
