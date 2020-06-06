@@ -76,7 +76,7 @@ def train(image_dir, base_dir, train_data_filename):
 
     trainDataset = FashionDataset(config, image_dir, train_data['train_ids'], train_data['class_names'], image_data,
                                   x_column,
-                                  y_column, aug_class=['Bags', 'Innerwear', 'Lips', 'Loungewear and Nightwear', 'Ties'])
+                                  y_column)
 
     valDataset = FashionDataset(config, image_dir, train_data['val_ids'], train_data['class_names'], image_data,
                                 x_column,
@@ -93,7 +93,7 @@ def train(image_dir, base_dir, train_data_filename):
         iaa.CropToFixedSize(width=trainDataset.image_shape[0], height=trainDataset.image_shape[1])
     ], random_order=True)
 
-    result = resnet.train(trainDataset, valDataset, layer='all', epoch=20, augmentation=augmentation)
+    result = resnet.train(trainDataset, valDataset, layer='all', epoch=20)
     return result
 
 
@@ -149,7 +149,7 @@ def display_random_data(data: FashionDataset):
     plt.figure(figsize=(20, 10))
     plt.imshow(np.hstack(selected_images))
     plt.figtext(.5, .75, 'Orginal picture', fontsize=30, ha='center')
-    plt.figtext(.5, .60, selected_images_class, fontsize=20, ha='center')
+    plt.figtext(.5, .70, selected_images_class, fontsize=20, ha='center')
     plt.figure(figsize=(20, 10))
     plt.figtext(.5, .75, 'augmented picture', fontsize=30, ha='center')
     plt.imshow(np.hstack(augmentation(images=selected_images)))
