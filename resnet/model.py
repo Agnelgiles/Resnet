@@ -333,10 +333,10 @@ class Resnet:
         # probs = np.zeros((data.num_images, data.num_classes))
         y_true = [data.get_class_for_image(img_id) for img_id in data.image_ids]
         data_gen = DataGenerator(data, data.config, shuffle=False)
-        probs = self.model.pre(data_gen,
-                               workers=n_workers,
-                               use_multiprocessing=True,
-                               verbose=1)
+        probs = self.model.predict(data_gen,
+                                   workers=n_workers,
+                                   use_multiprocessing=True,
+                                   verbose=1)
         probs = probs[:data.num_images, :]
         # for img_id in data.image_ids:
         #     probs[img_id] = self.model.predict(np.expand_dims(data.get_image(img_id)/255, axis=0))[0]
