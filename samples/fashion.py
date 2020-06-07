@@ -24,7 +24,7 @@ class FashionConfig(Config):
 
     NUMBER_OF_CLASSES = 25
 
-    BATCH_SIZE = 35
+    BATCH_SIZE = 30
 
     DATA_FRAME_FILE_NAME = 'images.csv'
 
@@ -156,7 +156,7 @@ def display_random_data(data: FashionDataset):
     plt.imshow(np.hstack(augmentation(images=selected_images)))
 
 
-def get_model(base_dir,train_data_filename):
+def get_model(base_dir, train_data_filename):
     config = FashionConfig()
     train_data_filename = os.path.join(base_dir, train_data_filename)
     with open(train_data_filename) as f:
