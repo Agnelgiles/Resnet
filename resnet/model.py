@@ -330,16 +330,16 @@ class Resnet:
             self.model.load_weights(ckpt_file)
             print('model load with weight {}'.format(ckpt_file))
         n_workers = multiprocessing.cpu_count()
-        probs = np.zeros((data.num_images, data.num_classes))
+        # probs = np.zeros((data.num_images, data.num_classes))
         y_true = [data.get_class_for_image(img_id) for img_id in data.image_ids]
-        # data_gen = DataGenerator(data, data.config, shuffle=False)
-        # probs = self.model.pre(data_gen,
-        #                            workers=n_workers,
-        #                            use_multiprocessing=True,
-        #                            verbose=1)
-        # probs = probs[:data.num_images, :]
-        for img_id in data.image_ids:
-            probs[img_id] = self.model.predict(np.expand_dims(data.get_image(img_id), axis=0))[0]
+        data_gen = DataGenerator(data, data.config, shuffle=False)
+        probs = self.model.pre(data_gen,
+                               workers=n_workers,
+                               use_multiprocessing=True,
+                               verbose=1)
+        probs = probs[:data.num_images, :]
+        # for img_id in data.image_ids:
+        #     probs[img_id] = self.model.predict(np.expand_dims(data.get_image(img_id)/255, axis=0))[0]
         y_pred = [p.argmax() for p in probs]
         print('Accuracy: %.3f' % accuracy_score(y_true, y_pred))
         print(classification_report(y_true, y_pred, target_names=data.class_names))
