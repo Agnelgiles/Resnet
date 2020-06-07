@@ -22,21 +22,21 @@ class FashionConfig(Config):
     """create Config file with your specific configuration by
      by override Config class"""
 
-    NUMBER_OF_CLASSES = 20
+    NUMBER_OF_CLASSES = 25
 
-    BATCH_SIZE = 30
+    BATCH_SIZE = 35
 
     DATA_FRAME_FILE_NAME = 'images.csv'
 
-    LEARNING_RATE = 0.001
+    # LEARNING_RATE = 0.001
 
     IMAGE_MIN_DIM = 448
 
     IMAGE_MAX_DIM = 448
 
-    EARLY_STOPPING_ENABLE = False
+    # EARLY_STOPPING_ENABLE = False
 
-    WEIGHT_DECAY = 0.00005
+    # WEIGHT_DECAY = 0.00005
 
     # MEAN_PIXEL = np.array([215.16, 210.46, 208.79])
 
