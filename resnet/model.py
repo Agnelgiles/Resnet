@@ -187,10 +187,9 @@ class Resnet:
 
         model = Model(imageInput, output)
 
-        sgd = SGD(lr=self.config.LEARNING_RATE, decay=self.config.WEIGHT_DECAY, momentum=self.config.MOMENTUM)
-        model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
-
         if self.mode == 'training':
+            sgd = SGD(lr=self.config.LEARNING_RATE, decay=self.config.WEIGHT_DECAY, momentum=self.config.MOMENTUM)
+            model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
             if self.ckpt_file is not None and os.path.isfile(self.ckpt_file):
                 model.load_weights(self.ckpt_file)
             return model

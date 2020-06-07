@@ -102,6 +102,7 @@ def evaluate(image_dir, base_dir, train_data_filename, ckpt_file=None):
     train_data_filename = os.path.join(base_dir, train_data_filename)
     with open(train_data_filename) as f:
         train_data = json.load(f)
+    config.NUMBER_OF_CLASSES = len(train_data['class_names'])
     dataframe_path = os.path.join(base_dir, config.DATA_FRAME_FILE_NAME)
     image_data = pd.read_csv(dataframe_path)
     x_column = train_data['x_column']
@@ -155,6 +156,10 @@ def display_random_data(data: FashionDataset):
     plt.imshow(np.hstack(augmentation(images=selected_images)))
 
 
-def get_model(base_dir):
+def get_model(base_dir,train_data_filename):
     config = FashionConfig()
+    train_data_filename = os.path.join(base_dir, train_data_filename)
+    with open(train_data_filename) as f:
+        train_data = json.load(f)
+    config.NUMBER_OF_CLASSES = len(train_data['class_names'])
     return Resnet('training', config, base_dir, arch='resnet50')
