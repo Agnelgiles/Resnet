@@ -62,12 +62,13 @@ class FashionDataset(Dataset):
         self.prepare()
 
 
-def train(image_dir, base_dir, train_data_filename):
+def train(image_dir, base_dir, train_data_filename, log_dir_name='log'):
     config = FashionConfig()
     train_data_filename = os.path.join(base_dir, train_data_filename)
     with open(train_data_filename) as f:
         train_data = json.load(f)
     config.NUMBER_OF_CLASSES = len(train_data['class_names'])
+    config.LOG_DIR_NAME = log_dir_name
     dataframe_path = os.path.join(base_dir, config.DATA_FRAME_FILE_NAME)
     image_data = pd.read_csv(dataframe_path)
 
