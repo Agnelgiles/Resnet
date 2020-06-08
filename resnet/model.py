@@ -14,7 +14,7 @@ from keras.layers import BatchNormalization
 from keras.layers import ZeroPadding2D
 from keras.layers import Flatten
 from keras import Model
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 import sys
 
 # plot packages
@@ -188,8 +188,10 @@ class Resnet:
         model = Model(imageInput, output)
 
         if self.mode == 'training':
-            sgd = SGD(lr=self.config.LEARNING_RATE, decay=self.config.WEIGHT_DECAY, momentum=self.config.MOMENTUM)
-            model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
+            # sgd = SGD(lr=self.config.LEARNING_RATE, decay=self.config.WEIGHT_DECAY, momentum=self.config.MOMENTUM)
+            adam = Adam()
+            model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy'])
+
             if self.ckpt_file is not None and os.path.isfile(self.ckpt_file):
                 model.load_weights(self.ckpt_file)
             return model
