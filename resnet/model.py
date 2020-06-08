@@ -260,6 +260,8 @@ class Resnet:
         """Sets the model log directory and epoch counter.
                 """
         self.log_dir = os.path.join(self.base_dir, self.config.LOG_DIR_NAME)
+        if not os.path.isdir(self.log_dir):
+            os.makedirs(self.log_dir)
         self.ckpt_file = None
 
         for file in os.listdir(self.log_dir):
